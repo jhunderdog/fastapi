@@ -17,28 +17,6 @@ def health_check_handler():
     return {"ping": "pong"}
 
 
-todo_data = {
-    1: {
-        "id":1,
-        "contents":"실전! FastAPI 섹션 0 수강",
-        "is_done": True,
-    },
-    2: {
-        "id":2,
-        "contents":"실전! FastAPI 섹션 1 수강",
-        "is_done": False,
-    },
-    3: {
-        "id":3,
-        "contents":"실전! FastAPI 섹션 2 수강",
-        "is_done": False,
-    },
-}
-#
-# @app.get("/todos")
-# def get_todos_handler():
-#     return list(todo_data.values())
-
 @app.get("/todos", status_code=200)
 def get_todos_handler(
         order: str | None = None,
@@ -58,11 +36,11 @@ def get_todos_handler(
 def get_todo_handler(
         todo_id: int,
         session: Session = Depends(get_db),
-) -> ToDoSchema :
+) -> ToDoSchema:
     todo : ToDo | None = get_todo_by_todo_id(session=session, todo_id=todo_id)
     if todo:
         return ToDoSchema.from_orm(todo)
-    return HTTPException(status_code=404, detail="Todo Not Found")
+    raise HTTPException(status_code=404, detail="ToDo Not Found")
 
 
 @app.post("/todos", status_code=201)
@@ -80,14 +58,14 @@ def update_todo_handler(
         todo_id: int,
         is_done: bool = Body(..., embed=True),
         session: Session = Depends(get_db)
-) -> ToDoSchema :
+) -> ToDoSchema:
     todo: ToDo | None = get_todo_by_todo_id(session=session, todo_id=todo_id)
     if todo:
         # update
         todo.done() if is_done else todo.undone()
         todo: ToDo = update_todo(session=session, todo=todo)
         return ToDoSchema.from_orm(todo)
-    return HTTPException(status_code=404, detail="Todo Not Found")
+    raise HTTPException(status_code=404, detail="ToDo Not Found")
 
 
 @app.delete("/todos/{todo_id}", status_code=204)
@@ -97,6 +75,6 @@ def delete_todo_handler(
 ):
     todo: ToDo | None = get_todo_by_todo_id(session=session, todo_id=todo_id)
     if not todo:
-        raise HTTPException(status_code=404, detail="Todo Not Found")
+        raise HTTPException(status_code=404, detail="ToDo Not Found")
         # delete
     delete_todo(session=session, todo_id=todo_id)
