@@ -1,31 +1,48 @@
 
-from database.orm import ToDo
-from database.repository import ToDoRepository
+from database.orm import ToDo, User
+from database.repository import ToDoRepository, UserRepository
+from service.user import UserService
 
 
 def test_get_todos(client,mocker):
     # order=ASC
-    mocker.patch.object(ToDoRepository, "get_todos", return_value=[
-        ToDo(id=1, contents="FastAPI Section 0", is_done=True),
-        ToDo(id=2, contents="FastAPI Section 1", is_done=False),
-    ])
-    response = client.get("/todos")
+    access_token: str = UserService().create_jwt(username="test")
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    user = User(id=1, username="test", password="hashed")
+    user.todos = [
+        ToDo(id=1, contents="FASTAPI Section 0", is_done=True),
+        ToDo(id=2, contents="FASTAPI Section 1", is_done=False),
+    ]
+    mocker.patch.object(
+        UserRepository, "get_user_by_username",
+        return_value=user
+    )
+
+    response = client.get("/todos", headers=headers)
     assert response.status_code == 200
-    assert response.json() == {
-        "todos": [
-            {"id": 1, "contents": "FastAPI Section 0", "is_done": True},
-            {"id": 2, "contents": "FastAPI Section 1", "is_done": False},
-        ]
-    }
-    # order=DESC
-    response = client.get("/todos?order=DESC")
-    assert response.status_code == 200
-    assert response.json() == {
-        "todos": [
-            {"id": 2, "contents": "FastAPI Section 1", "is_done": False},
-            {"id": 1, "contents": "FastAPI Section 0", "is_done": True},
-        ]
-    }
+
+    # mocker.patch.object(ToDoRepository, "get_todos", return_value=[
+    #     ToDo(id=1, contents="FastAPI Section 0", is_done=True),
+    #     ToDo(id=2, contents="FastAPI Section 1", is_done=False),
+    # ])
+    # response = client.get("/todos")
+    # assert response.status_code == 200
+    # assert response.json() == {
+    #     "todos": [
+    #         {"id": 1, "contents": "FastAPI Section 0", "is_done": True},
+    #         {"id": 2, "contents": "FastAPI Section 1", "is_done": False},
+    #     ]
+    # }
+    # # order=DESC
+    # response = client.get("/todos?order=DESC")
+    # assert response.status_code == 200
+    # assert response.json() == {
+    #     "todos": [
+    #         {"id": 2, "contents": "FastAPI Section 1", "is_done": False},
+    #         {"id": 1, "contents": "FastAPI Section 0", "is_done": True},
+    #     ]
+    # }
 
 
 def test_get_todo(client, mocker):

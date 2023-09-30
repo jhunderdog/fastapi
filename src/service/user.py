@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-
+import time
+import random
 import bcrypt
 from jose import jwt
 class UserService:
@@ -37,3 +38,12 @@ class UserService:
         )
         # expire
         return payload["sub"] #username
+
+    @staticmethod
+    def create_otp() -> int:
+        return random.randint(1000, 9999)
+
+    @staticmethod
+    def send_email_to_user(email: str) -> None:
+        time.sleep(10)
+        print(f"Sending email to {email}!")
