@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL ="mysql+pymysql://root:todos@127.0.01:3306/todos"
+DATABASE_URL ="mysql+pymysql://root:todos@todos.ctgmm5zsc3fm.ap-northeast-2.rds.amazonaws.com:3306/todos"
 
 engine = create_engine(DATABASE_URL)
 SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
